@@ -1,0 +1,9 @@
+# Python packages for owl-rllib.bridges (Gymnasium, MuJoCo, VizDoom).
+# These are the versions the tests' reference data was recorded with.
+# Needs Python 3.12 or older (VizDoom 1.2.3).
+gymnasium==0.29.1
+numpy<2
+Box2D==2.3.10    # LunarLander
+mujoco==3.1.2    # Hopper, HalfCheetah and other MuJoCo tasks
+imageio          # needed by Gymnasium's MuJoCo environments
+vizdoom==1.2.3   # examples/classic/a8_vizdoom.ml

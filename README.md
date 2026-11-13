@@ -36,7 +36,8 @@ it uses `Optimise.Stepper`, which is only on Owl's main branch.
 ### Docker
 
 The image `matrixanger/owl-rllib` (tag `latest`) has Owl's main branch and
-owl-rllib built, tested and installed. It is rebuilt whenever this repository
+owl-rllib built, tested and installed, together with the Python packages for
+the Gymnasium / MuJoCo / VizDoom bridge. It is rebuilt whenever this repository
 or the Owl image (`matrixanger/owl:main`) changes.
 
 ```bash
@@ -74,19 +75,21 @@ source with Owl 1.2 from the repository.
 `owl-rllib.bridges` runs Gymnasium or VizDoom in a Python child process, so it
 needs Python with those packages; nothing else does. The interpreter is
 `$OWL_RLLIB_PYTHON`, by default `python3`, and tests that need the packages
-are skipped when they are missing. The versions below are the ones the tests'
-reference data was recorded with. VizDoom 1.2.3 needs Python 3.12 or older, so
-in the Docker image (Python 3.14) create a Python 3.11 environment with
-[uv](https://docs.astral.sh/uv/):
+are skipped when they are missing.
+
+The Docker image already has them: Python 3.11 in `/opt/venv`, with
+`OWL_RLLIB_PYTHON` set, so the bridge examples and the MuJoCo benchmarks run
+as they are.
+
+Elsewhere, install the versions in
+[`python-requirements.txt`](python-requirements.txt), the ones the tests'
+reference data was recorded with. VizDoom 1.2.3 needs Python 3.12 or older;
+with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-apt-get update && apt-get install -y curl
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH=/root/.local/bin:$PATH
-uv venv --python 3.11 /root/venv
-uv pip install --python /root/venv/bin/python \
-  gymnasium==0.29.1 "numpy<2" Box2D==2.3.10 mujoco==3.1.2 imageio vizdoom==1.2.3
-export OWL_RLLIB_PYTHON=/root/venv/bin/python
+uv venv --python 3.11 ~/.venvs/owl-rllib
+uv pip install --python ~/.venvs/owl-rllib/bin/python -r python-requirements.txt
+export OWL_RLLIB_PYTHON=~/.venvs/owl-rllib/bin/python
 dune test   # now also runs the bridge tests
 ```
 

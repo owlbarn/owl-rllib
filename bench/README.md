@@ -57,7 +57,7 @@ dune build bench
 python3 bench/acceptance.py --output bench/results.csv
 ```
 
-The `mujoco` group needs Gymnasium with MuJoCo; `--groups` selects a subset
+The `mujoco` group needs Gymnasium with MuJoCo (installed in the Docker image); `--groups` selects a subset
 (`dqn,ppo,mujoco,pendulum,a2c`). `native.py` starts each OCaml process with
 the environment captured before Python's numerical libraries are imported,
 which can otherwise change the dynamic libraries Owl loads.
