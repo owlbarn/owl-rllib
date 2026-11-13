@@ -2,6 +2,25 @@
 
 Reinforcement learning on top of {{:https://github.com/owlbarn/owl}Owl}.
 
-The library is {!Owl_rllib}; the optional Python bridge (Gymnasium and VizDoom
-in a child process) is {!Owl_rllib_bridges}. See the README and the programs in
-[examples/] for an introduction.
+The package has three libraries:
+
+- [owl-rllib] ({!Owl_rllib}): MDPs, tabular methods and dynamic programming;
+  classic control environments; DQN, REINFORCE, A2C and PPO.
+- [owl-rllib.llm] ({!Owl_rllib_llm}): RL for language models on a toy model
+  (REINFORCE, RLOO, token-level PPO, GRPO and its variants).
+- [owl-rllib.bridges] ({!Owl_rllib_bridges}): Gymnasium and VizDoom
+  environments, run in a Python child process.
+
+{1 Where to start}
+
+- Environments: {!Owl_rllib.Ndenv} (array observations), {!Owl_rllib.Env}
+  (tabular), {!Owl_rllib.Vec_env}; {!Owl_rllib.Cartpole} and the other
+  classic control tasks.
+- Algorithms: {!Owl_rllib.Dp}, {!Owl_rllib.Tabular}, {!Owl_rllib.Dqn},
+  {!Owl_rllib.Reinforce}, {!Owl_rllib.A2c}, {!Owl_rllib.Ppo}.
+- Networks and policies: {!Owl_rllib.Neural}, {!Owl_rllib.Policy}.
+- Reproducibility: {!Owl_rllib.Rng}.
+
+Most modules are functors over Owl's single ([S]) or double ([D]) precision,
+with [S] and [D] instances provided. The programs in [examples/] show each
+part in use.

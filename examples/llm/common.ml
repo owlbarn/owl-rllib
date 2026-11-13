@@ -1,5 +1,6 @@
 (* Shared by the B chapters: data, the fine-tuned starting point, evaluation. *)
 open Owl_rllib
+open Owl_rllib_llm
 module R = Lm_rl.S
 
 let train, test = Lm_task.split ~seed:0 ()

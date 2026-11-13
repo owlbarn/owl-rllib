@@ -17,6 +17,7 @@
 
    OPENBLAS_NUM_THREADS=1 dune exec examples/llm/b7a_dr_grpo.exe *)
 open Owl_rllib
+open Owl_rllib_llm
 open Common
 
 let task = Lm_task.addition_with_filler

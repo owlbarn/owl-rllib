@@ -3,4 +3,5 @@
 (library
  (name owl_rllib_bridges)
  (public_name owl-rllib.bridges)
- (libraries owl-rllib unix))
+ (libraries owl-rllib unix)
+ (private_modules python))

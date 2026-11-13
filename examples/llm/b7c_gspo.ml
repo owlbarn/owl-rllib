@@ -12,6 +12,7 @@
 
    OPENBLAS_NUM_THREADS=1 dune exec examples/llm/b7c_gspo.exe  (about 3 minutes) *)
 open Owl_rllib
+open Owl_rllib_llm
 open Common
 
 let std xs =

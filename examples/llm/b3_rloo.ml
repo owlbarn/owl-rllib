@@ -7,6 +7,7 @@
 
    OPENBLAS_NUM_THREADS=1 dune exec examples/llm/b3_rloo.exe *)
 open Owl_rllib
+open Owl_rllib_llm
 open Common
 
 let () =

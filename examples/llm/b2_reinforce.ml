@@ -9,6 +9,7 @@
 
    OPENBLAS_NUM_THREADS=1 dune exec examples/llm/b2_reinforce.exe *)
 open Owl_rllib
+open Owl_rllib_llm
 open Common
 
 let () =

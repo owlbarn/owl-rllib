@@ -1,6 +1,6 @@
 (tests
  (names test_tabular test_function_approximation test_actor_critic test_lm test_grpo_variants
   test_ppo_details test_bridges)
- (libraries owl-rllib owl-rllib.bridges alcotest)
+ (libraries owl-rllib owl-rllib.llm owl-rllib.bridges alcotest)
  (deps
   (glob_files fixtures/*.txt)))

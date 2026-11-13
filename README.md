@@ -20,9 +20,10 @@ DQN and PPO match CleanRL's published results on its benchmark environments
 - **Deep RL**: linear function approximation, REINFORCE (with an optional
   baseline), DQN, A2C and PPO, with categorical and Gaussian policies, on
   Owl's neural networks (MLPs and small CNNs).
-- **RL for language models**: a toy autoregressive model on a verifiable task
-  (two-digit addition), with REINFORCE, RLOO, token-level PPO, GRPO, and the
-  GRPO variants Dr. GRPO, DAPO, GSPO and CISPO as configuration switches.
+- **RL for language models** (`owl-rllib.llm`): a toy autoregressive model on
+  a verifiable task (two-digit addition), with REINFORCE, RLOO, token-level
+  PPO, GRPO, and the GRPO variants Dr. GRPO, DAPO, GSPO and CISPO as
+  configuration switches.
 - **Python bridge** (`owl-rllib.bridges`, optional): any Gymnasium environment
   (e.g. LunarLander, MuJoCo) and VizDoom scenarios, run in a Python child
   process and exposed as ordinary environments.
@@ -38,7 +39,7 @@ git clone https://github.com/owlbarn/owl.git
 cd owl && make install
 ```
 
-Then build owl-rllib:
+Then build owl-rllib (the API documentation is generated with `dune build @doc`):
 
 ```bash
 git clone https://github.com/owlbarn/owl-rllib.git
@@ -57,6 +58,14 @@ the interpreter; the default is `python3`. Tests that need these packages are
 skipped when they are missing.
 
 ## Quick start
+
+The package has three libraries: `owl-rllib` (module `Owl_rllib`),
+`owl-rllib.llm` (`Owl_rllib_llm`) and `owl-rllib.bridges`
+(`Owl_rllib_bridges`). With dune:
+
+```
+(executable (name main) (libraries owl-rllib))
+```
 
 ```ocaml
 open Owl_rllib
