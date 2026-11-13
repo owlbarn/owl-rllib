@@ -1,0 +1,7 @@
+{0 owl-rllib}
+
+Reinforcement learning on top of {{:https://github.com/owlbarn/owl}Owl}.
+
+The library is {!Owl_rllib}; the optional Python bridge (Gymnasium and VizDoom
+in a child process) is {!Owl_rllib_bridges}. See the README and the programs in
+[examples/] for an introduction.

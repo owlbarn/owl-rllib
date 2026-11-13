@@ -1,0 +1,6 @@
+(include_subdirs unqualified)
+
+(library
+ (name owl_rllib)
+ (public_name owl-rllib)
+ (libraries owl))

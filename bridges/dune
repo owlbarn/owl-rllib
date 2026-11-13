@@ -1,0 +1,6 @@
+; Gymnasium and VizDoom in a Python child process. Needs no OCaml package
+; beyond unix; the Python packages are only needed at run time.
+(library
+ (name owl_rllib_bridges)
+ (public_name owl-rllib.bridges)
+ (libraries owl-rllib unix))

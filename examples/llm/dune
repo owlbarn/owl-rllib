@@ -1,0 +1,4 @@
+(executables
+ (names b0_sft b1_formulation b2_reinforce b3_rloo b4_kl b5_ppo b6_grpo b7a_dr_grpo b7b_dapo
+  b7c_gspo b7d_cispo)
+ (libraries owl-rllib unix))

@@ -1,0 +1,8 @@
+(executables
+ (names a1_mdp a2_dp a3_tabular a4_approximation a5_dqn a6_reinforce a7_actor_critic)
+ (libraries owl-rllib))
+
+; These need Gymnasium (with Box2D) or VizDoom at run time.
+(executables
+ (names a7_lunar_lander a8_vizdoom)
+ (libraries owl-rllib owl-rllib.bridges unix))

@@ -1,0 +1,8 @@
+(executables
+ (names dqn_cleanrl ppo_cleanrl a2c_zoo)
+ (libraries owl-rllib unix))
+
+; Needs Gymnasium with MuJoCo at run time.
+(executables
+ (names ppo_continuous)
+ (libraries owl-rllib owl-rllib.bridges unix))
