@@ -31,8 +31,25 @@ DQN and PPO match CleanRL's published results on its benchmark environments
 ## Installation
 
 owl-rllib needs a version of Owl newer than the latest release on opam (1.2):
-it uses `Optimise.Stepper`, which is only on Owl's main branch. Build Owl from
-source first:
+it uses `Optimise.Stepper`, which is only on Owl's main branch.
+
+### Docker
+
+The image `matrixanger/owl-rllib` (tag `latest`) has Owl's main branch and
+owl-rllib built, tested and installed. It is rebuilt whenever this repository
+or the Owl image (`matrixanger/owl:main`) changes.
+
+```bash
+docker run -it matrixanger/owl-rllib
+cd /root/owl-rllib
+dune exec examples/classic/a7_actor_critic.exe
+```
+
+Other projects in the container can use `(libraries owl-rllib)` directly.
+
+### From source
+
+Build Owl from source first:
 
 ```bash
 git clone https://github.com/owlbarn/owl.git
@@ -52,10 +69,30 @@ dune test
 Do not run `opam install . --deps-only`: opam would replace the Owl built from
 source with Owl 1.2 from the repository.
 
-The Python bridge needs Python 3 with `gymnasium` (and `Box2D` or `mujoco` for
-the corresponding environments) or `vizdoom`. Set `OWL_RLLIB_PYTHON` to choose
-the interpreter; the default is `python3`. Tests that need these packages are
-skipped when they are missing.
+### Python, for the bridge
+
+`owl-rllib.bridges` runs Gymnasium or VizDoom in a Python child process, so it
+needs Python with those packages; nothing else does. The interpreter is
+`$OWL_RLLIB_PYTHON`, by default `python3`, and tests that need the packages
+are skipped when they are missing. The versions below are the ones the tests'
+reference data was recorded with. VizDoom 1.2.3 needs Python 3.12 or older, so
+in the Docker image (Python 3.14) create a Python 3.11 environment with
+[uv](https://docs.astral.sh/uv/):
+
+```bash
+apt-get update && apt-get install -y curl
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH=/root/.local/bin:$PATH
+uv venv --python 3.11 /root/venv
+uv pip install --python /root/venv/bin/python \
+  gymnasium==0.29.1 "numpy<2" Box2D==2.3.10 mujoco==3.1.2 imageio vizdoom==1.2.3
+export OWL_RLLIB_PYTHON=/root/venv/bin/python
+dune test   # now also runs the bridge tests
+```
+
+Box2D is needed for LunarLander, MuJoCo and imageio for Hopper and the other
+MuJoCo tasks, and VizDoom for `examples/classic/a8_vizdoom.ml`; install only
+what you use.
 
 ## Quick start
 
@@ -105,7 +142,9 @@ Each file's header gives the command to run it and what it shows.
 ## Reproducibility
 
 Every random choice goes through an explicit `Random.State.t` (see `Rng`):
-the same seed on the same machine gives bit-identical results. One exception:
+the same seed on the same machine gives bit-identical results (another
+machine or BLAS build, including the Docker image, gives different but
+equally valid ones). One exception:
 training a convolutional network in Owl occasionally differs by one unit in
 the last place between runs, so the VizDoom example (a8) is not bit-for-bit
 reproducible.
