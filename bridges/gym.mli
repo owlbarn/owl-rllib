@@ -16,6 +16,12 @@ module Make (A : Owl_types_ndarray_algodiff.Sig) : sig
       [Invalid_argument] if the actions are not discrete. Raises [Failure] if Python cannot create
       the environment. *)
 
+  val discrete_with_renderer : seed:int -> string ->
+    (A.arr, int) Owl_rllib.Ndenv.t * (unit -> int * int * bytes)
+  (** Like [discrete], with [render_mode="rgb_array"]. The callback returns
+      width, height and row-major RGB bytes for the current state, after reset
+      or step. Rendering does not advance the environment. *)
+
   val continuous : seed:int -> string -> (A.arr, A.arr) Owl_rllib.Ndenv.t
   (** The same with Box actions. *)
 end

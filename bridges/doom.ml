@@ -47,6 +47,8 @@ def handle(command, args):
     if command == 'reset':
         game.new_episode()
         reply(screen())
+    elif command == 'render':
+        reply(screen())
     elif command == 'step':
         action = [0] * buttons
         action[int(args[0])] = 1
@@ -64,7 +66,7 @@ let hex_digit c = match c with
   | _ -> failwith "Doom: malformed screen"
 
 module Make (A : Owl_types_ndarray_algodiff.Sig) = struct
-  let make ?(frame_skip = 4) ?(downsample = 2) ~seed scenario : (A.arr, int) Ndenv.t =
+  let make_with_renderer ?(frame_skip = 4) ?(downsample = 2) ~seed scenario =
     if frame_skip <= 0 || downsample <= 0 then invalid_arg "Doom.make: positive frame_skip and downsample required";
     let name = "VizDoom " ^ scenario in
     let process, info = Python.start ~name ~script [| scenario; string_of_int seed; string_of_int frame_skip |] in
@@ -99,9 +101,20 @@ module Make (A : Owl_types_ndarray_algodiff.Sig) = struct
           { Ndenv.obs = screen hex; reward = float_of_string reward; terminated; truncated }
       | _ -> failwith (name ^ ": malformed step reply")
     in
+    let frame () =
+      match Python.request process "render" with
+      | [ hex ] when String.length hex = 2 * rows * columns ->
+          let gray = Bytes.init (rows * columns) (fun i ->
+            Char.chr (16 * hex_digit hex.[2*i] + hex_digit hex.[2*i+1])) in
+          columns, rows, gray
+      | _ -> failwith (name ^ ": reset before requesting a frame")
+    in
     let n = height * width in
     { Ndenv.observation_space = Space.box ~low:(Array.make n 0.) ~high:(Array.make n 1.) ~shape:[| height; width; 1 |]
-    ; action_space = Space.Discrete buttons; reset; step }
+    ; action_space = Space.Discrete buttons; reset; step }, frame
+
+  let make ?frame_skip ?downsample ~seed scenario =
+    fst (make_with_renderer ?frame_skip ?downsample ~seed scenario)
 end
 
 module S = Make (Owl.Neural.S.Algodiff.A)

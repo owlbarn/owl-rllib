@@ -12,7 +12,7 @@ let script =
 try:
     import gymnasium as gym
     import numpy as np
-    env = gym.make(sys.argv[1])
+    env = gym.make(sys.argv[1], **({"render_mode": "rgb_array"} if sys.argv[3] == "1" else {}))
     seed = int(sys.argv[2])
 
     def space(s):
@@ -36,6 +36,11 @@ def handle(command, args):
         obs, _ = env.reset(seed=seed)
         seed = None
         reply(observation(obs))
+    elif command == 'render':
+        frame = np.asarray(env.render(), dtype=np.uint8)
+        if frame.ndim != 3 or frame.shape[2] != 3:
+            raise ValueError('Gym: expected an RGB frame')
+        reply(frame.shape[1], frame.shape[0], frame.tobytes().hex())
     elif command == 'step':
         if isinstance(env.action_space, gym.spaces.Discrete):
             action = int(args[0])
@@ -68,8 +73,8 @@ let space = function
 module Make (A : Owl_types_ndarray_algodiff.Sig) = struct
   let array shape words = A.of_array (Array.map A.float_to_elt (floats words)) shape
 
-  let make ~seed id ~encode =
-    let process, info = Python.start ~name:("Gym " ^ id) ~script [| id; string_of_int seed |] in
+  let make ~render ~seed id ~encode =
+    let process, info = Python.start ~name:("Gym " ^ id) ~script [| id; string_of_int seed; if render then "1" else "0" |] in
     let observation_space, rest = space info in
     let action_space, _ = space rest in
     let shape = match observation_space with
@@ -90,20 +95,37 @@ module Make (A : Owl_types_ndarray_algodiff.Sig) = struct
           { Ndenv.obs = array shape obs; reward = float_of_string reward; terminated; truncated }
       | _ -> failwith ("Gym " ^ id ^ ": malformed step reply")
     in
-    { Ndenv.observation_space; action_space; reset; step }
+    let frame () =
+      match Python.request process "render" with
+      | [ width; height; hex ] ->
+          let width = int_of_string width and height = int_of_string height in
+          let rgb = Bytes.init (String.length hex / 2) (fun i ->
+            Char.chr (int_of_string ("0x" ^ String.sub hex (2 * i) 2))) in
+          if Bytes.length rgb <> width * height * 3 then failwith "Gym: short RGB frame";
+          width, height, rgb
+      | _ -> failwith "Gym: malformed frame reply"
+    in
+    { Ndenv.observation_space; action_space; reset; step }, frame
 
   let discrete ~seed id : (A.arr, int) Ndenv.t =
-    let env = make ~seed id ~encode:string_of_int in
+    let env, _ = make ~render:false ~seed id ~encode:string_of_int in
     (match env.action_space with
      | Discrete _ -> ()
      | Box _ -> invalid_arg ("Gym.discrete: " ^ id ^ " has continuous actions"));
     env
 
+  let discrete_with_renderer ~seed id =
+    let env, frame = make ~render:true ~seed id ~encode:string_of_int in
+    (match env.Ndenv.action_space with
+     | Discrete _ -> ()
+     | Box _ -> invalid_arg ("Gym.discrete_with_renderer: " ^ id ^ " has continuous actions"));
+    env, frame
+
   let continuous ~seed id : (A.arr, A.arr) Ndenv.t =
     let encode action =
       let flat = A.reshape action [| A.numel action |] in
       String.concat " " (List.init (A.numel action) (fun i -> Python.hex (A.elt_to_float (A.get flat [| i |])))) in
-    let env = make ~seed id ~encode in
+    let env, _ = make ~render:false ~seed id ~encode in
     (match env.action_space with
      | Box _ -> ()
      | Discrete _ -> invalid_arg ("Gym.continuous: " ^ id ^ " has discrete actions"));

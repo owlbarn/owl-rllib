@@ -16,6 +16,14 @@ module Make (A : Owl_types_ndarray_algodiff.Sig) : sig
       that ends otherwise (a kill, a death) is terminated. VizDoom renders no screen after the end,
       so the final observation repeats the last one. Raises [Invalid_argument] unless [downsample]
       divides 120 and 160. *)
+
+  val make_with_renderer :
+    ?frame_skip:int -> ?downsample:int -> seed:int -> string ->
+    (A.arr, int) Owl_rllib.Ndenv.t * (unit -> int * int * bytes)
+  (** Like [make], with a callback returning width, height and row-major
+      8-bit grayscale pixels at the original screen resolution. Call after
+      reset or step. At episode end, returns the last available frame.
+      Rendering does not advance the environment. *)
 end
 
 module S : module type of Make (Owl.Neural.S.Algodiff.A)

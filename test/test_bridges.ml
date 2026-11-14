@@ -104,6 +104,20 @@ let gym_contract () =
   Alcotest.check_raises "wrong action space" (Invalid_argument "Gym.continuous: CartPole-v1 has discrete actions")
     (fun () -> ignore (Gym.S.continuous ~seed:0 "CartPole-v1"))
 
+let gym_renderer () =
+  let plain = Gym.S.discrete ~seed:17 "CartPole-v1" in
+  let env, frame = Gym.S.discrete_with_renderer ~seed:17 "CartPole-v1" in
+  Alcotest.check floats "render preserves reset" (values (plain.reset ())) (values (env.reset ()));
+  let w, h, rgb = frame () in
+  Alcotest.(check bool) "nonempty RGB" true (w > 0 && h > 0 && Bytes.length rgb = w * h * 3);
+  let _, _, again = frame () in
+  Alcotest.(check bool) "render does not advance" true (rgb = again);
+  List.iter (fun a ->
+    let a1 = plain.step a and a2 = env.step a in
+    ignore (frame ());
+    Alcotest.check floats "render preserves trajectory" (values a1.obs) (values a2.obs);
+    Alcotest.(check (float 0.)) "render preserves reward" a1.reward a2.reward) [0; 1; 0; 1]
+
 let doom_fixture () =
   let env = Doom.S.make ~seed:7 "basic" in
   Alcotest.(check bool) "spaces" true
@@ -127,10 +141,27 @@ let doom_fixture () =
   Alcotest.(check bool) "fixture covers a kill and a time limit" true
     (List.mem (true, false) !ends && List.mem (false, true) !ends)
 
+let doom_renderer () =
+  let env, frame = Doom.S.make_with_renderer ~seed:7 "basic" in
+  let obs = env.reset () in
+  let w, h, gray = frame () in
+  Alcotest.(check (pair int int)) "screen size" (160,120) (w,h);
+  Alcotest.(check int) "pixel count" (w*h) (Bytes.length gray);
+  let _, _, again = frame () in
+  Alcotest.(check bool) "render does not advance" true (gray = again);
+  for r = 0 to 59 do for c = 0 to 79 do
+    let pixel r c = float_of_int (Char.code (Bytes.get gray (r*w+c))) in
+    let expected = (pixel (2*r) (2*c) +. pixel (2*r+1) (2*c) +.
+      pixel (2*r) (2*c+1) +. pixel (2*r+1) (2*c+1)) /. 1020. in
+    Alcotest.(check (float 1e-7)) "frame agrees with observation" expected (A.get obs [|r;c;0|])
+  done done
+
 let () =
   Alcotest.run "bridges"
     [ "wrappers", [ Alcotest.test_case "frame stack" `Quick frame_stack; Alcotest.test_case "cnn" `Quick cnn ]
     ; "bridges",
       [ Alcotest.test_case "gymnasium trajectories" `Quick (requires "gymnasium" gym_fixture)
       ; Alcotest.test_case "gymnasium contract" `Quick (requires "gymnasium" gym_contract)
+      ; Alcotest.test_case "gymnasium renderer" `Quick (requires "gymnasium,pygame" gym_renderer)
+      ; Alcotest.test_case "vizdoom renderer" `Quick (requires "vizdoom" doom_renderer)
       ; Alcotest.test_case "vizdoom trajectories" `Quick (requires "vizdoom" doom_fixture) ] ]
