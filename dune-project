@@ -21,5 +21,5 @@
  (tags (reinforcement-learning machine-learning owl))
  (depends
   (ocaml (>= 5.1))
-  (owl (> 1.2))
-  (alcotest :with-test)))
+  (owl (>= 1.3))
+  (alcotest (and :with-test (>= 1.0.0)))))

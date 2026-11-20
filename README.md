@@ -30,8 +30,14 @@ DQN and PPO match CleanRL's published results on its benchmark environments
 
 ## Installation
 
-owl-rllib needs a version of Owl newer than the latest release on opam (1.2):
-it uses `Optimise.Stepper`, which is only on Owl's main branch.
+owl-rllib needs Owl 1.3 or later, which needs OpenBLAS and LAPACKE (e.g.
+`libopenblas-dev liblapacke-dev` on Debian and Ubuntu, `openblas` on Homebrew).
+
+### opam
+
+```bash
+opam install owl-rllib
+```
 
 ### Docker
 
@@ -50,25 +56,15 @@ Other projects in the container can use `(libraries owl-rllib)` directly.
 
 ### From source
 
-Build Owl from source first:
-
-```bash
-git clone https://github.com/owlbarn/owl.git
-cd owl && make install
-```
-
-Then build owl-rllib (the API documentation is generated with `dune build @doc`):
-
 ```bash
 git clone https://github.com/owlbarn/owl-rllib.git
 cd owl-rllib
-opam install alcotest   # only needed for the tests
+opam install . --deps-only --with-test   # Owl and, for the tests, alcotest
 dune build
 dune test
 ```
 
-Do not run `opam install . --deps-only`: opam would replace the Owl built from
-source with Owl 1.2 from the repository.
+The API documentation is generated with `dune build @doc`.
 
 ### Python, for the bridge
 
